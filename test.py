@@ -31,7 +31,7 @@ if __name__ == '__main__':
     stream = Stream(auth, l)
 	
 	if len(sys.argv) == 2:
-        keywords = sys.argv[1]
+		keywords = sys.argv[1]
 
 	print "Let's talk about."
     #This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
