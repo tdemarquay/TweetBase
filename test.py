@@ -2,6 +2,7 @@
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
+import os, sys
 
 #Variables that contains the user credentials to access Twitter API 
 access_token = "69917660-SBdzu887lwdyc4J51VWsTnnbqWE9jLyvUtwAa6wWg"
@@ -28,6 +29,10 @@ if __name__ == '__main__':
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     stream = Stream(auth, l)
+	
+	if len(sys.argv) == 2:
+        keywords = sys.argv[1]
 
+	print "Let's talk about."
     #This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
     stream.filter(track=['python', 'javascript', 'ruby'])
