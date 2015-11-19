@@ -7,11 +7,12 @@ if(isset($_POST['keywords']))
 {
 
 	$track = $_POST['keywords'];
-	$parameters = "'".$track."'";
+	$follow = $_POST['user_id'];
+	$parameters = "'".$track."', '".$follow."'";
 
 	if(isset($_POST['future']) && $_POST['future']=="future")
 	{	
-		$command = "python /home/thibault/tweetBase/TweetBase/test.py ".$parameters." > /dev/null 2>/dev/null &";
+		$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/output 2>/home/thibault/tweetBase/TweetBase/output &";
 	}
 	else $command ="";
 
@@ -28,6 +29,10 @@ if(isset($_POST['keywords']))
 <div style="text-align:center">
 	<form method="post" action="createTask.php">
 	   <p>
+	    <label for="pseudo">Username :</label>
+		   <input style="width:500px" type="text" name="user_id" id="pseudo" /><br/>Separate by comma. 
+	   
+	   
 		   <label for="pseudo">Keywords :</label>
 		   <input style="width:500px" type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
 		   
