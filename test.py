@@ -15,7 +15,8 @@ consumer_secret = "bEOA1g3odwRTYc8sSmmTnHItpHtGWACLpey5J6iQVXQjMcsEKO"
 class StdOutListener(StreamListener):
 
     def on_data(self, data):
-        print data
+	f = open('website/workfile', 'a+')
+	f.write(data)
         return True
 
     def on_error(self, status):
@@ -24,15 +25,20 @@ class StdOutListener(StreamListener):
 
 if __name__ == '__main__':
 
-    #This handles Twitter authetification and the connection to Twitter Streaming API
-    l = StdOutListener()
-    auth = OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    stream = Stream(auth, l)
+	#This handles Twitter authetification and the connection to Twitter Streaming API
+	os.remove('website/workfile')
+	l = StdOutListener()
+	auth = OAuthHandler(consumer_key, consumer_secret)
+ 	auth.set_access_token(access_token, access_token_secret)
+	stream = Stream(auth, l)
 	
-	if len(sys.argv) == 2:
-        keywords = sys.argv[1]
+	if len(sys.argv) != 2:
+		print "Parameters missing"
+		exit(0)
 
-	print "Let's talk about."
-    #This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
-    stream.filter(track=['python', 'javascript', 'ruby'])
+        	
+	keywords = sys.argv[1]
+
+	print "Let's talk about. %s" % keywords
+	#This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
+	stream.filter(track='python')
