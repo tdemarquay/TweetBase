@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Import the necessary methods from tweepy library
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
@@ -19,7 +21,7 @@ def extract_parameter(parameter) :
 class StdOutListener(StreamListener):
 
     def on_data(self, data):
-	f = open('website/workfile', 'a+')
+	f = open('/home/thibault/tweetBase/TweetBase/website/workfile', 'a+')
 	f.write(data)
         return True
 
@@ -30,8 +32,8 @@ class StdOutListener(StreamListener):
 if __name__ == '__main__':
 
 	#This handles Twitter authetification and the connection to Twitter Streaming API
-	if os.path.isfile('website/workfile'): 
-		os.remove('website/workfile')
+	if os.path.isfile('/home/thibault/tweetBase/TweetBase/website/workfile'): 
+		os.remove('/home/thibault/tweetBase/TweetBase/website/workfile')
 		print 'File exist, deleting'
 	l = StdOutListener()
 	auth = OAuthHandler(consumer_key, consumer_secret)
