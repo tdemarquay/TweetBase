@@ -8,7 +8,7 @@ if(isset($_POST['keywords']))
 
 	$track = $_POST['keywords'];
 	$follow = $_POST['user_id'];
-	$parameters = "'".$track."', '".$follow."'";
+	$parameters = "'".$track."' '".$follow."'";
 
 	if(isset($_POST['future']) && $_POST['future']=="future")
 	{	
@@ -30,7 +30,7 @@ if(isset($_POST['keywords']))
 	<form method="post" action="createTask.php">
 	   <p>
 	    <label for="pseudo">Username :</label>
-		   <input style="width:500px" type="text" name="user_id" id="pseudo" /><br/>Separate by comma. 
+		   <input style="width:500px" type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
 	   
 	   
 		   <label for="pseudo">Keywords :</label>
