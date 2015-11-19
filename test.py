@@ -32,10 +32,10 @@ if __name__ == '__main__':
  	auth.set_access_token(access_token, access_token_secret)
 	stream = Stream(auth, l)
 	
+
 	if len(sys.argv) != 2:
 		print "Parameters missing"
 		exit(0)
-
         	
 	keywords = sys.argv[1]
 
