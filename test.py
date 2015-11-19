@@ -10,6 +10,10 @@ access_token_secret = "Iknrq4yjZPxxw9QvJBcMkDGiKEvdJoc4UQ2D5h5X9hunl"
 consumer_key = "DcH2VKtNmaBYuykyrLrT9r6fc"
 consumer_secret = "bEOA1g3odwRTYc8sSmmTnHItpHtGWACLpey5J6iQVXQjMcsEKO"
 
+def extract_parameter(parameter) :
+	list = []
+	list = parameter.split(',')
+	return list
 
 #This is a basic listener that just prints received tweets to stdout.
 class StdOutListener(StreamListener):
@@ -26,7 +30,9 @@ class StdOutListener(StreamListener):
 if __name__ == '__main__':
 
 	#This handles Twitter authetification and the connection to Twitter Streaming API
-	os.remove('website/workfile')
+	if os.path.isfile('website/workfile'): 
+		os.remove('website/workfile')
+		print 'File exist, deleting'
 	l = StdOutListener()
 	auth = OAuthHandler(consumer_key, consumer_secret)
  	auth.set_access_token(access_token, access_token_secret)
@@ -41,4 +47,4 @@ if __name__ == '__main__':
 
 	print "Let's talk about. %s" % keywords
 	#This line filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
-	stream.filter(track='python')
+	stream.filter(track=extract_parameter(keywords))
