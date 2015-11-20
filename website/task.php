@@ -1,15 +1,25 @@
+<?php
+include ('bdd.php');
+?>
+
 <a href="listTasks.php"> List tasks</a><br/><br/>
 <?php
 ini_set('display_errors',1);
 
-
+//If the user wants to create a task
 if(isset($_POST['keywords']))
 {
-
+	//We get the information of the form
+	if(!isset($_POST['user_info'])) $user_info = 0;
+	else $user_info = 1;
 	$track = $_POST['keywords'];
 	$follow = $_POST['user_id'];
-	$parameters = "'".$track."' '".$follow."'";
-
+	//we concatenate all the parameters
+	$parameters = "'".$track."' '".$follow."' ".$user_info;
+	
+	addTask($track, $follow, $user_info);
+	
+	//It is not the same command, it depends of it's a future reseach (streaming api) or past research (rest api)
 	if(isset($_POST['future']) && $_POST['future']=="future")
 	{	
 	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/output 2>/home/thibault/tweetBase/TweetBase/output &";
@@ -17,11 +27,13 @@ if(isset($_POST['keywords']))
 	}
 	else $command ="";
 
+	//We print the user command for debugging
 	echo "The executed command is  : ".$command;
+	//If an old process was processing, we kill it
 	exec("pkill python");
+	//We execute the command. We check that command variable is not empty
 	if(!empty($command))exec($command,$output);
 	print_r($output);
-	//print_r($_POST);
 }
 ?>
 
