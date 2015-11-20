@@ -41,12 +41,17 @@ if(isATaskRunning())
 {
 	echo "<h1>Current task</h1>"; 
 	$disabled = "disabled";
-	$keywo
+	$current_task = getCurrentTaskId();
+	$keywords = getKeywords($current_task);
+	$user_id = getUserId($current_task);
+	if(getUserInfo($current_task)) $user_info = "checked"; else $user_info ="";
+	if(getFuture($current_task)) $future = "checked"; else $future = "";
 }
 else 
 {
 	echo "<h1>Create a task</h1>";
 	$disabled = "";
+	$current_task = -1;
 	$keywords = "";
 	$user_id = "";
 	$user_info = "checked";
