@@ -28,35 +28,51 @@ if(isset($_POST['keywords']))
 	else $command ="";
 
 	//We print the user command for debugging
-	echo "The executed command is  : ".$command;
+	echo "<br/>The executed command is  : ".$command."<br/><br/>";
 	//If an old process was processing, we kill it
 	exec("pkill python");
 	//We execute the command. We check that command variable is not empty
 	if(!empty($command))exec($command,$output);
-	print_r($output);
+	//print_r($output);
+}
+
+//We check if a taskis running
+if(isATaskRunning())
+{
+	echo "<h1>Current task</h1>"; 
+	$disabled = "disabled";
+	$keywo
+}
+else 
+{
+	echo "<h1>Create a task</h1>";
+	$disabled = "";
+	$keywords = "";
+	$user_id = "";
+	$user_info = "checked";
+	$future = "checked";
+	
 }
 ?>
 
-
-<h1> Create task</h1>
 <div style="text-align:center">
 	<form method="post" action="task.php">
 	   <p>
 	    <label for="pseudo">Username :</label>
-		   <input style="width:500px" type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
+		   <input style="width:500px" value="<?php echo $user_id;?>" <?php echo $disabled;?>  type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
 	   
 	   
 		   <label for="pseudo">Keywords :</label>
-		   <input style="width:500px" type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
+		   <input style="width:500px" value="<?php echo $keywords; ?>" <?php echo $disabled?> type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
 		   
 
 		   <br /><br />
  		   <label for="pass">Future tweets :</label>
-		   <input type="checkbox" name="future" value="future" checked> 
+		   <input type="checkbox" name="future" value="future" <?php echo $future." ".$disabled; ?> > 
 
 		  <br /><br />
                    <label for="pass">Download also user information :</label>
-                   <input type="checkbox" name="user_info" value="user_info" checked>
+                   <input type="checkbox" name="user_info" value="user_info" <?php echo $user_info." ".$disabled; ?>>
 
 		  
 		   <br /><br />
