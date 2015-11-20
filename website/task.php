@@ -12,14 +12,15 @@ if(isset($_POST['keywords']))
 
 	if(isset($_POST['future']) && $_POST['future']=="future")
 	{	
-		$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/output 2>/home/thibault/tweetBase/TweetBase/output &";
+	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/output 2>/home/thibault/tweetBase/TweetBase/output &";
+//$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 2>&1 &";
 	}
 	else $command ="";
 
 	echo "The executed command is  : ".$command;
 	exec("pkill python");
 	if(!empty($command))exec($command,$output);
-	//print_r($output);
+	print_r($output);
 	//print_r($_POST);
 }
 ?>
@@ -27,7 +28,7 @@ if(isset($_POST['keywords']))
 
 <h1> Create task</h1>
 <div style="text-align:center">
-	<form method="post" action="createTask.php">
+	<form method="post" action="task.php">
 	   <p>
 	    <label for="pseudo">Username :</label>
 		   <input style="width:500px" type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
@@ -38,8 +39,13 @@ if(isset($_POST['keywords']))
 		   
 
 		   <br /><br />
-		   <label for="pass">Future tweets :</label>
+ 		   <label for="pass">Future tweets :</label>
 		   <input type="checkbox" name="future" value="future" checked> 
+
+		  <br /><br />
+                   <label for="pass">Download also user information :</label>
+                   <input type="checkbox" name="user_info" value="user_info" checked>
+
 		  
 		   <br /><br />
 		   <input type="submit" name="create" value="Create task" id="pass" />
