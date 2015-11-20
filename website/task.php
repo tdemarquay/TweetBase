@@ -1,14 +1,45 @@
 <?php
 include ('bdd.php');
 ?>
+<head>
+<title> Current/Create task</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script>
+function getLog() {
+	setInterval(function() {
+		$.get( "count.php", function( data ) {
+			 $('#results_nb').text(data);	
+		});
 
+	}, 1000);
+
+	setInterval(function() {
+    		$('#error_textarea').load('output');
+	}, 1000);
+}
+
+</script>
+</head>
+<body onload="getLog()">
 <a href="listTasks.php"> List tasks</a><br/><br/>
 <?php
 ini_set('display_errors',1);
 
-//If the user wants to create a task
-if(isset($_POST['keywords']))
+//Change state of task
+if(isset($_GET['pause'])) pauseTask();
+if(isset($_GET['resume'])) resumeTask();
+if(isset($_GET['stop']))
 {
+ exec("pkill  python");
+ stopAllTask();
+}
+
+
+//If the user wants to create a task
+if(isset($_POST['new']))
+{
+	//Not possible case but a checking must be done
+	stopAllTask();
 	//We get the information of the form
 	if(!isset($_POST['user_info'])) $user_info = 0;
 	else $user_info = 1;
@@ -22,7 +53,7 @@ if(isset($_POST['keywords']))
 	//It is not the same command, it depends of it's a future reseach (streaming api) or past research (rest api)
 	if(isset($_POST['future']) && $_POST['future']=="future")
 	{	
-	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/output 2>/home/thibault/tweetBase/TweetBase/output &";
+	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
 //$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 2>&1 &";
 	}
 	else $command ="";
@@ -42,10 +73,10 @@ if(isATaskRunning())
 	echo "<h1>Current task</h1>"; 
 	$disabled = "disabled";
 	$current_task = getCurrentTaskId();
-	$keywords = getKeywords($current_task);
-	$user_id = getUserId($current_task);
-	if(getUserInfo($current_task)) $user_info = "checked"; else $user_info ="";
-	if(getFuture($current_task)) $future = "checked"; else $future = "";
+	$keywords = getTaskKeywords($current_task);
+	$user_id = getTaskUserId($current_task);
+	if(getTaskUserInfo($current_task)) $user_info = "checked"; else $user_info ="";
+	if(getTaskFuture($current_task)) $future = "checked"; else $future = "";
 }
 else 
 {
@@ -61,8 +92,9 @@ else
 ?>
 
 <div style="text-align:center">
-	<form method="post" action="task.php">
+	<?php if(!isATaskRunning()) echo '<form method="post" action="task.php">'; ?>
 	   <p>
+		<?php if(!isATaskRunning()) echo '<input type="hidden" name="new">'; ?>
 	    <label for="pseudo">Username :</label>
 		   <input style="width:500px" value="<?php echo $user_id;?>" <?php echo $disabled;?>  type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
 	   
@@ -81,8 +113,24 @@ else
 
 		  
 		   <br /><br />
-		   <input type="submit" name="create" value="Create task" id="pass" />
-	   </p>
+		<?php if(isATaskRunning()) { ?>
+		<input type="submit" value="Stop task" onclick="window.location.href='task.php?stop=1'">
+		<input type="submit" value="Pause task" onclick="window.location.href='task.php?pause=1'" <?php if(isATaskInPause()) echo "disabled"; ?>>
+		<input type="submit" value="Resume task" onclick="window.location.href='task.php?resume=1'" <?php if(!isATaskInPause()) echo "disabled"; ?>>
 
-	</form>
+			
+
+		<?php }
+		else { ?>
+		   <input type="submit" name="create" value="Create task" id="pass" />
+		<?php } ?>	   
+</p>
+
+	<?php if(!isATaskRunning()) echo '</form>'; ?>
+<h2><a href = "workfile">Results in real time </a> (Currently : <p style="display:inline" id="results_nb"></p> results/tweets)</h2>
+<br/>
+<h2>Errors/warnings</h2>
+<textarea style="width:800px;height:200px" id="error_textarea"></textarea>
 </div>
+</body>
+

@@ -33,9 +33,78 @@ function addTask($keywords, $user_id, $user_info)
 //Know if a task is running
 function isATaskRunning()
 {
-	$result = $bdd->query("SELECT COUNT(*) FROM task WHERE state = 1");
+	global $bdd;
+	$result = $bdd->query("SELECT COUNT(*) FROM task WHERE state > 0");
 	if($result->fetchColumn()>0) return true;
 	else return false;
 }
 
+//Know if a task is în Pause
+function isATaskInPause()
+{
+        global $bdd;
+        $result = $bdd->query("SELECT COUNT(*) FROM task WHERE state = 2");
+        if($result->fetchColumn()>0) return true;
+        else return false;
+}
+
+
+//Get task id of running task
+function getCurrentTaskId()
+{
+	global $bdd;
+	$result = $bdd->query("SELECT task_id FROM task WHERE state > 0");
+	return $result->fetch()['task_id'];
+}
+
+function getTaskKeywords($id)
+{
+	global $bdd;
+	$result = $bdd->query("SELECT keywords FROM task WHERE task_id = ".$id);
+	return $result->fetch()['keywords'];
+}
+
+function getTaskUserId($id)
+{
+	global $bdd;
+        $result = $bdd->query("SELECT user_id FROM task WHERE task_id = ".$id);
+        return $result->fetch()['user_id'];
+}
+
+function getTaskUserInfo($id)
+{
+	global $bdd;
+        $result = $bdd->query("SELECT user_information FROM task WHERE task_id = ".$id);
+        if($result->fetch()['user_information'] == 1) return true; else return false;
+}
+
+function getTaskFuture($id)
+{
+	global $bdd;
+        $result = $bdd->query("SELECT end_datetime FROM task WHERE task_id = ".$id);
+    	if($result->fetch()['end_datetime'] == "0000-00-00 00:00:00") return true; else return false;
+}
+
+//Stop all current task
+function  stopAllTask()
+{
+	global $bdd;
+	$result = $bdd->query("UPDATE task SET state = 0");
+}
+
+//Resume all current task
+function  resumeTask()
+{
+        global $bdd;
+        $result = $bdd->query("UPDATE task SET state = 1 WHERE state=2");
+}
+
+//Stop all current task
+function  pauseTask()
+{
+        global $bdd;
+        $result = $bdd->query("UPDATE task SET state = 2 WHERE state = 1");
+}
+
 ?>
+
