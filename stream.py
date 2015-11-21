@@ -5,8 +5,8 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from tweepy import API
-import os, sys, tweepy, code
-
+import os, sys, tweepy
+import code
 def extract_parameter(parameter) :
 	list = []
 	if not parameter:
@@ -19,7 +19,7 @@ class StdOutListener(StreamListener):
 
     def on_data(self, data):
 	f = open('/home/thibault/tweetBase/TweetBase/website/workfile', 'a+')
-	f.write(data+'bonjour')
+	f.write(data)
         return True
 
     def on_error(self, status):
@@ -39,8 +39,8 @@ if __name__ == '__main__':
 		os.remove('/home/thibault/tweetBase/TweetBase/website/workfile')
 		print 'Data file exist, deleting'
 	l = StdOutListener()
-	auth = OAuthHandler(consumer_key, consumer_secret)
- 	auth.set_access_token(access_token, access_token_secret)
+	auth = OAuthHandler(code.consumer_key, code.consumer_secret)
+ 	auth.set_access_token(code.access_token, code.access_token_secret)
 	#Connection to the stream API
 	stream = Stream(auth, l)
 	#Connection to witter API (needed for user information)

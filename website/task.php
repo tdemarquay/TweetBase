@@ -1,5 +1,6 @@
 <?php
 include ('bdd.php');
+include('functions.php');
 ?>
 <head>
 <title> Current/Create task</title>
@@ -26,12 +27,26 @@ function getLog() {
 ini_set('display_errors',1);
 
 //Change state of task
-if(isset($_GET['pause'])) pauseTask();
-if(isset($_GET['resume'])) resumeTask();
+if(isset($_GET['pause'])) 
+{
+	pauseTask();
+	exec("pkill -STOP python");
+}
+if(isset($_GET['resume']))
+{
+	resumeTask();
+	exec("pkill -CONT python");
+}
 if(isset($_GET['stop']))
 {
- exec("pkill  python");
- stopAllTask();
+	//Kill process
+	exec("pkill  python");
+	readFileAndSave(getTaskUserInfo(getCurrentTaskId()));
+	//Update end time
+	endCurrentTask();
+	stopAllTask();
+	if(file_exists("workfile"))unlink("workfile");
+	if(file_exists("output"))unlink("output");
 }
 
 
@@ -126,11 +141,11 @@ else
 		<?php } ?>	   
 </p>
 
-	<?php if(!isATaskRunning()) echo '</form>'; ?>
-<h2><a href = "workfile">Results in real time </a> (Currently : <p style="display:inline" id="results_nb"></p> results/tweets)</h2>
-<br/>
+	<?php if(!isATaskRunning()) echo '</form>'; else { ?>
+<h2><a href = "workfile">Results file </a> (Currently : <p style="display:inline" id="results_nb"></p> results/tweets)</h2>
 <h2>Errors/warnings</h2>
 <textarea style="width:800px;height:200px" id="error_textarea"></textarea>
+<?php } ?>
 </div>
 </body>
 
