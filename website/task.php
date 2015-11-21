@@ -31,11 +31,13 @@ if(isset($_GET['pause']))
 {
 	pauseTask();
 	exec("pkill -STOP python");
+	echo "Task paused";
 }
 if(isset($_GET['resume']))
 {
 	resumeTask();
 	exec("pkill -CONT python");
+	echo "Task resumed";
 }
 if(isset($_GET['stop']))
 {
@@ -47,7 +49,9 @@ if(isset($_GET['stop']))
 	stopAllTask();
 	if(file_exists("workfile"))unlink("workfile");
 	if(file_exists("output"))unlink("output");
+	echo "Tesk stopped anddata saved in database";
 }
+
 
 
 //If the user wants to create a task

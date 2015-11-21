@@ -200,7 +200,7 @@ function endCurrentTask()
 function getNumberTweets($task_id) 
 {
 	global $bdd;
-	$result = $bdd->query("SELECT COUNT(*) FROM task WHERE task_id= ".$task_id);
+	$result = $bdd->query("SELECT COUNT(*) FROM tweet WHERE task_id= ".$task_id);
 	return $result->fetch()['COUNT(*)'];
 }
 
@@ -216,6 +216,15 @@ function getTasks()
 //Dete a task
 function deleteTask($task_id)
 {
+	global $bdd;
 
+	$result = $bdd->query("SELECT user_id FROM tweet WHERE  task_id = ".$task_id);
+	$results = $result->fetchAll();
+	foreach($results as $res)
+		$bdd->exec("DELETE FROM user WHERE id = ".$res['user_id']);
+	$bdd->exec("DELETE FROM tweet WHERE task_id = ".$task_id);
+	$bdd->exec("DELETE FROM task WHERE task_id = ".$task_id);
 
+}
 ?>
+
