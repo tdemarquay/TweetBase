@@ -169,7 +169,7 @@ function saveTweet($tweet, $task_id)
 	
 	//Prepara data	
 	$user_id = (isset($tweet['user']['id'])) ? $tweet['user']['id'] : 0;
-	$id = (isset($tweet['id'])) ? $tweet]['id'] : 0;
+	$id = (isset($tweet['id'])) ? $tweet['id'] : 0;
 	$text = (isset($tweet['text'])) ? $tweet['text'] : '';
 	$created_at = (isset($tweet['created_at'])) ?  DateTime::createFromFormat('D M d H:i:s P Y',  (string)$tweet['created_at'])->format('Y-m-d H:i:s') : 0;
 	$source = (isset($tweet['source'])) ? $tweet['source'] : '';
@@ -250,6 +250,16 @@ function generateCSV()
 	LINES TERMINATED BY "\n"
 	FROM task,tweet,user 
 	WHERE tweet.user_id = user.user_id AND tweet.task_id = task.task_id AND task.state = 0');
+}
+
+//delete all data
+function purge()
+{
+	global $bdd;
+	$bdd->exec("DELETE FROM relationship");
+	$bdd->exec("DELETE FROM user");
+	$bdd->exec("DELETE FROM tweet");
+	$bdd->exec("DELETE FROM task");
 }
 ?>
 

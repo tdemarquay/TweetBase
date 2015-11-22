@@ -10,12 +10,14 @@ function readFileAndSave($user_info)
 		while(!feof($file))
 		{
 			$line = fgets($file, 100024);
-
-			$line = trim(preg_replace('/\s+/', ' ', $line));
-			$json = json_decode($line,true);
-			$user=saveUser($json['user']); 
-			saveTweet($json, getCurrentTaskId());
-		
+			//We check if the line is empty
+			if(!empty($line))
+			{
+				$line = trim(preg_replace('/\s+/', ' ', $line));
+				$json = json_decode($line,true);
+				$user=saveUser($json['user']); 
+				saveTweet($json, getCurrentTaskId());
+			}
 		}
 	}
 }

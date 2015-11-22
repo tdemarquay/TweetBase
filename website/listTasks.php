@@ -11,8 +11,15 @@ if(isset($_GET['delete']))
 	deleteTask($_GET['delete']);
 	$error = "Task deleted";
 }
+if(isset($_GET['purge']))
+{
+        purge();
+        $error = "All data deleted";
+}
+
 if(isset($_GET['csv'])) 
 {
+	if(file_exists("mydata.csv")) unlink("mydata.csv");
 	generateCSV();
 	header('Location: mydata.csv');
 }
@@ -24,7 +31,7 @@ if(isset($_GET['csv']))
 <body>
 <a href="task.php">Create/current task</a><br/><br/>
 <h1>List tasks</h1>
-<?php echo "<br/>".$error."<br/>"; ?>
+<?php echo "<br/>".$error."<br/><br/>"; ?>
 <div style="text-align:center">
 <table style="width:90%;border: 1px solid black;margin:auto"> 
 <tr>
@@ -52,7 +59,7 @@ if(isset($_GET['csv']))
 		else echo "<td>Paused</td>";
 		
 		echo "<td>".$task['keywords']."</td>";
-		echo "<td>".$task['user_id']."</td>";
+		echo "<td>".$task['users']."</td>";
 		echo "<td>".getNumberTweets($task['task_id'])."</td>";
 		if($task['user_information']==0)echo "<td>No</td>";
 		else echo "<td>Yes</td>";
@@ -60,11 +67,17 @@ if(isset($_GET['csv']))
 		
 		echo "<td>".$task['task_start_datetime']."</td>";
 		echo "<td>".$task['task_end_datetime']."</td>";
-		echo "<td><input type='button' onclick=\"location.href='listTasks.php?delete=".$task['task_id']."';\" value=\"Delete\"></td>";
-		echo "<td><input type='button' onclick=\"location.href='listTasks.php?csv=1';\" value=\"CSV\"></td>";
+		if($task['state']==0) echo "<td><input type='button' onclick=\"location.href='listTasks.php?delete=".$task['task_id']."';\" value=\"Delete\"></td>";
+		else echo "Current task";
+		if($task['state']==0)echo "<td><input type='button' onclick=\"location.href='listTasks.php?csv=1';\" value=\"CSV\"></td>";
+		else echo "Current task";
 		echo "</tr>";
 	}
 ?>
 </table>
+
+<br/>
+<td><input type='button' onclick="location.href='listTasks.php?purge=1';" value="Delete all data">
+
 </div>
 </body>

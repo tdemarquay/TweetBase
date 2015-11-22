@@ -114,7 +114,7 @@ else
 		   <input style="width:500px" value="<?php echo $keywords; ?>" <?php echo $disabled?> type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
 		 
 		  <br /><br />
-                   <label for="pass">Download also user information :</label>
+                   <label for="pass">Download also user information and relationships :</label>
                    <input type="checkbox" name="user_info" value="user_info" <?php echo $user_info." ".$disabled; ?>>
 
 		  

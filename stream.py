@@ -5,7 +5,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from tweepy import API
-import os, sys, tweepy
+import os, sys, tweepy, json
 import code
 def extract_parameter(parameter) :
 	list = []
@@ -20,6 +20,15 @@ class StdOutListener(StreamListener):
     def on_data(self, data):
 	f = open('/home/thibault/tweetBase/TweetBase/website/workfile', 'a+')
 	f.write(data)
+	
+	#decoded = json.loads(data)
+
+	#user = decoded['user']['id']
+
+	#ff = open('/home/thibault/tweetBase/TweetBase/website/users', 'a+')
+	#for follower in api.followers_ids(user):
+		#ff.write(json.dumps(api.get_user(follower)._json))
+	#ff.close
         return True
 
     def on_error(self, status):
