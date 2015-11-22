@@ -11,6 +11,11 @@ if(isset($_GET['delete']))
 	deleteTask($_GET['delete']);
 	$error = "Task deleted";
 }
+if(isset($_GET['csv'])) 
+{
+	generateCSV();
+	header('Location: mydata.csv');
+}
 ?>
 <head>
 <title> List past tasks</title>
@@ -18,6 +23,7 @@ if(isset($_GET['delete']))
 </head>
 <body>
 <a href="task.php">Create/current task</a><br/><br/>
+<h1>List tasks</h1>
 <?php echo "<br/>".$error."<br/>"; ?>
 <div style="text-align:center">
 <table style="width:90%;border: 1px solid black;margin:auto"> 
@@ -28,11 +34,10 @@ if(isset($_GET['delete']))
 <td>Users</td>
 <td>Nb results</td>
 <td>User info</td>
-<td>Prev start </td>
-<td>Prev end</td>
-<td>Real start</td>
-<td>Real end</td>
+<td>Start</td>
+<td>End</td>
 <td>Delete</td>
+<td>Download</td>
 </tr>
 <?php
 	$tasks = getTasks();
@@ -55,9 +60,8 @@ if(isset($_GET['delete']))
 		
 		echo "<td>".$task['task_start_datetime']."</td>";
 		echo "<td>".$task['task_end_datetime']."</td>";
-		echo "<td>".$task['start_datetime']."</td>";
-		echo "<td>".$task['end_datetime']."</td>";
 		echo "<td><input type='button' onclick=\"location.href='listTasks.php?delete=".$task['task_id']."';\" value=\"Delete\"></td>";
+		echo "<td><input type='button' onclick=\"location.href='listTasks.php?csv=1';\" value=\"CSV\"></td>";
 		echo "</tr>";
 	}
 ?>

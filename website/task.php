@@ -49,7 +49,7 @@ if(isset($_GET['stop']))
 	stopAllTask();
 	if(file_exists("workfile"))unlink("workfile");
 	if(file_exists("output"))unlink("output");
-	echo "Tesk stopped anddata saved in database";
+	echo "Task stopped and data saved in database";
 }
 
 
@@ -68,14 +68,8 @@ if(isset($_POST['new']))
 	$parameters = "'".$track."' '".$follow."' ".$user_info;
 	
 	addTask($track, $follow, $user_info);
-	
-	//It is not the same command, it depends of it's a future reseach (streaming api) or past research (rest api)
-	if(isset($_POST['future']) && $_POST['future']=="future")
-	{	
+		
 	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
-//$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 2>&1 &";
-	}
-	else $command ="";
 
 	//We print the user command for debugging
 	echo "<br/>The executed command is  : ".$command."<br/><br/>";
@@ -95,7 +89,6 @@ if(isATaskRunning())
 	$keywords = getTaskKeywords($current_task);
 	$user_id = getTaskUserId($current_task);
 	if(getTaskUserInfo($current_task)) $user_info = "checked"; else $user_info ="";
-	if(getTaskFuture($current_task)) $future = "checked"; else $future = "";
 }
 else 
 {
@@ -105,7 +98,6 @@ else
 	$keywords = "";
 	$user_id = "";
 	$user_info = "checked";
-	$future = "checked";
 	
 }
 ?>
@@ -120,12 +112,7 @@ else
 	   
 		   <label for="pseudo">Keywords :</label>
 		   <input style="width:500px" value="<?php echo $keywords; ?>" <?php echo $disabled?> type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
-		   
-
-		   <br /><br />
- 		   <label for="pass">Future tweets :</label>
-		   <input type="checkbox" name="future" value="future" <?php echo $future." ".$disabled; ?> > 
-
+		 
 		  <br /><br />
                    <label for="pass">Download also user information :</label>
                    <input type="checkbox" name="user_info" value="user_info" <?php echo $user_info." ".$disabled; ?>>
@@ -146,7 +133,7 @@ else
 </p>
 
 	<?php if(!isATaskRunning()) echo '</form>'; else { ?>
-<h2><a href = "workfile">Results file </a> (Currently : <p style="display:inline" id="results_nb"></p> results/tweets)</h2>
+<h2><a href = "workfile">Results file </a> (Currently : <p style="display:inline" id="results_nb">0</p> results/tweets)</h2>
 <h2>Errors/warnings</h2>
 <textarea style="width:800px;height:200px" id="error_textarea"></textarea>
 <?php } ?>

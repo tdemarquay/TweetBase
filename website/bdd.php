@@ -2,8 +2,8 @@
 try
 {
 	$bdd = new PDO('mysql:host=localhost;dbname=tweetbase;charset=utf8', 'tweetbase', 'TWEETBASE');
- $bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $bdd->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+	$bdd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$bdd->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 }
 catch (Exception $e)
 {
@@ -11,24 +11,18 @@ catch (Exception $e)
 }
 
 //Add a task in the database
-function addTask($keywords, $user_id, $user_info)
+function addTask($keywords, $users, $user_info)
 {
 	global $bdd;
 
-	$req = $bdd->prepare('INSERT INTO task(task_start_datetime, task_end_datetime, keywords, user_id, end_datetime, start_datetime, user_information, state) VALUES(NOW(), :task_end_datetime, :keywords, :user_id, :end_datetime, NOW(), :user_information, 1)');
-	if(!$req)
-	{
-		//echo "\nPDO::errorInfo():\n";
-   		 //print_r($req->errorInfo());
-	}
+	$req = $bdd->prepare('INSERT INTO task(task_start_datetime, task_end_datetime, keywords, users, user_information, state) VALUES(NOW(), :task_end_datetime, :keywords, :users,  :user_information, 1)');
+	
 	$req->execute(array(
 		'task_end_datetime' => 0, 
 		'keywords' => $keywords, 
-		'user_id' => $user_id, 
-		'end_datetime' => 0, 
+		'users' => $users,
 		'user_information' => $user_info
     	));
-	//print_r($bdd->errorInfo()); 
 	echo 'Task created !<br/>';
 }
 
@@ -66,25 +60,20 @@ function getTaskKeywords($id)
 	return $result->fetch()['keywords'];
 }
 
+//Return the users id follow of this task
 function getTaskUserId($id)
 {
 	global $bdd;
-        $result = $bdd->query("SELECT user_id FROM task WHERE task_id = ".$id);
-        return $result->fetch()['user_id'];
+        $result = $bdd->query("SELECT users FROM task WHERE task_id = ".$id);
+        return $result->fetch()['users'];
 }
 
+//Return true if there is user infi needed info for this task or false if not
 function getTaskUserInfo($id)
 {
 	global $bdd;
         $result = $bdd->query("SELECT user_information FROM task WHERE task_id = ".$id);
         if($result->fetch()['user_information'] == 1) return true; else return false;
-}
-
-function getTaskFuture($id)
-{
-	global $bdd;
-        $result = $bdd->query("SELECT end_datetime FROM task WHERE task_id = ".$id);
-    	if($result->fetch()['end_datetime'] == "0000-00-00 00:00:00") return true; else return false;
 }
 
 //Stop all current task
@@ -112,7 +101,10 @@ function  pauseTask()
 function saveUser($users)
 {	
 	global $bdd;
-	$req = $bdd->prepare('INSERT INTO user(user_id, name, screen_name, location, url, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, created_at) VALUES(:user_id, :name, :screen_name, :location, :url, :description, :followers_count, :friends_count, :listed_count, :favourites_count, :statuses_count, :created_at)');
+	$req = $bdd->prepare('INSERT INTO user(user_id, name, screen_name, location, url, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, created_at)
+ VALUES(:user_id, :name, :screen_name, :location, :url, :description, :followers_count, :friends_count, :listed_count, :favourites_count, :statuses_count, :created_at)
+ ON DUPLICATE KEY UPDATE name = :name2, screen_name = :screen_name2, location = :location2, url = :url2, description = :description2, followers_count = :followers_count2, 
+friends_count = :friends_count2, listed_count = :listed_count2, favourites_count = :favourites_count2, statuses_count = :statuses_count2, created_at = :created_at2');
 	
 	$user_id = (isset($users['id'])) ? $users['id'] : 0;
 	$name = (isset($users['name'])) ? $users['name'] : '';
@@ -139,21 +131,45 @@ function saveUser($users)
 		'listed_count'=> $listed_count,
 		'favourites_count'=> $favourites_count,
 		'statuses_count'=> $statuses_count,
-		'created_at' => $created_at
+		'created_at' => $created_at,
+                'name'=> $name,
+                'screen_name'=> $screen_name,
+                'location'=> $location,
+                'url'=> $url,
+                'description'=> $description,
+                'followers_count'=> $followers_count,
+                'friends_count'=> $friends_count,
+                'listed_count'=> $listed_count,
+                'favourites_count'=> $favourites_count,
+                'statuses_count'=> $statuses_count,
+                'created_at' => $created_at,
+                'name2'=> $name,
+                'screen_name2'=> $screen_name,
+                'location2'=> $location,
+                'url2'=> $url,
+                'description2'=> $description,
+                'followers_count2'=> $followers_count,
+                'friends_count2'=> $friends_count,
+                'listed_count2'=> $listed_count,
+                'favourites_count2'=> $favourites_count,
+                'statuses_count2'=> $statuses_count,
+                'created_at2' => $created_at
+
 		));
 		
 	return $bdd->lastInsertId();
 }
 
 //Insert a tweet
-function saveTweet($tweet, $task_id, $user_id)
+function saveTweet($tweet, $task_id)
 {	
 	global $bdd;
 	$req = $bdd->prepare('INSERT INTO tweet( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, coordinates, place, geo, user_id) 
 	VALUES(:id, :task_id, :text, :created_at, :source, :in_reply_to_status_id, :in_reply_to_user_id, :in_reply_to_screen_name, :retweet_count, :favorite_count, :coordinates, :place, :geo, :user_id)');
 	
 	//Prepara data	
-	$id = (isset($tweet['id'])) ? $tweet['id'] : 0;
+	$user_id = (isset($tweet['user']['id'])) ? $tweet['user']['id'] : 0;
+	$id = (isset($tweet['id'])) ? $tweet]['id'] : 0;
 	$text = (isset($tweet['text'])) ? $tweet['text'] : '';
 	$created_at = (isset($tweet['created_at'])) ?  DateTime::createFromFormat('D M d H:i:s P Y',  (string)$tweet['created_at'])->format('Y-m-d H:i:s') : 0;
 	$source = (isset($tweet['source'])) ? $tweet['source'] : '';
@@ -192,8 +208,7 @@ function endCurrentTask()
 {
 	global $bdd;
 
-	$bdd->query('UPDATE task SET end_datetime=NOW() WHERE state > 0');
-	$bdd->query('UPDATE task SET task_end_datetime=NOW() WHERE state > 0 AND task_end_datetime = \'0000-00-00 00:00:00\'');
+	$bdd->query('UPDATE task SET task_end_datetime=NOW() WHERE state > 0');
 }
 
 //Get number of tweets for a task
@@ -218,13 +233,23 @@ function deleteTask($task_id)
 {
 	global $bdd;
 
-	$result = $bdd->query("SELECT user_id FROM tweet WHERE  task_id = ".$task_id);
-	$results = $result->fetchAll();
-	foreach($results as $res)
-		$bdd->exec("DELETE FROM user WHERE id = ".$res['user_id']);
-	$bdd->exec("DELETE FROM tweet WHERE task_id = ".$task_id);
+	//$result = $bdd->query("SELECT user_id FROM tweet WHERE  task_id = ".$task_id);
+	//$results = $result->fetchAll();
+	//foreach($results as $res)
+		//$bdd->exec("DELETE FROM user WHERE id = ".$res['user_id']);
+	//$bdd->exec("DELETE FROM tweet WHERE task_id = ".$task_id);
 	$bdd->exec("DELETE FROM task WHERE task_id = ".$task_id);
 
+}
+
+function generateCSV()
+{
+	global $bdd;
+	$bdd->query('SELECT * INTO OUTFILE "/home/thibault/tweetBase/TweetBase/website/mydata.csv"
+	FIELDS TERMINATED BY \',\' OPTIONALLY ENCLOSED BY \'"\'
+	LINES TERMINATED BY "\n"
+	FROM task,tweet,user 
+	WHERE tweet.user_id = user.user_id AND tweet.task_id = task.task_id AND task.state = 0');
 }
 ?>
 

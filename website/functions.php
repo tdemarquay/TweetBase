@@ -13,8 +13,8 @@ function readFileAndSave($user_info)
 
 			$line = trim(preg_replace('/\s+/', ' ', $line));
 			$json = json_decode($line,true);
-			if($user_info)$user=saveUser($json['user']); else $user=0;
-			saveTweet($json, getCurrentTaskId(), $user);
+			$user=saveUser($json['user']); 
+			saveTweet($json, getCurrentTaskId());
 		
 		}
 	}
