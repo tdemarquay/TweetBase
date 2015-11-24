@@ -72,8 +72,11 @@ function getTaskUserId($id)
 function getTaskUserInfo($id)
 {
 	global $bdd;
-        $result = $bdd->query("SELECT user_information FROM task WHERE task_id = ".$id);
+	if(!is_null($id) && !empty($id))
+	{
+		$result = $bdd->query("SELECT user_information FROM task WHERE task_id = ".$id);
         if($result->fetch()['user_information'] == 1) return true; else return false;
+	}
 }
 
 //Stop all current task
@@ -160,6 +163,69 @@ friends_count = :friends_count2, listed_count = :listed_count2, favourites_count
 	return $bdd->lastInsertId();
 }
 
+//Add an user
+function saveUser2($user_id, $name, $screen_name, $location, $url, $description, $followers_count, $friends_count, $listed_count, $favourites_count, $statuses_count, $created_at)
+{	
+	global $bdd;
+	$req = $bdd->prepare('INSERT INTO user(user_id, name, screen_name, location, url, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, created_at)
+ VALUES(:user_id, :name, :screen_name, :location, :url, :description, :followers_count, :friends_count, :listed_count, :favourites_count, :statuses_count, :created_at)
+ ON DUPLICATE KEY UPDATE name = :name2, screen_name = :screen_name2, location = :location2, url = :url2, description = :description2, followers_count = :followers_count2, 
+friends_count = :friends_count2, listed_count = :listed_count2, favourites_count = :favourites_count2, statuses_count = :statuses_count2, created_at = :created_at2');
+	
+	//$user_id = (isset($users['id'])) ? $users['id'] : 0;
+	//$name = (isset($users['name'])) ? $users['name'] : '';
+	//$screen_name = (isset($users['screen_name'])) ? $users['screen_name'] : '';
+	///$location = (isset($users['location'])) ? $users['location'] : '';
+	//$url = (isset($users['url'])) ? $users['url'] : '';
+	//$description = (isset($users['description'])) ? $users['description'] : '';
+	//$followers_count = (isset($users['followers_count'])) ? $users['followers_count'] : 0;
+	//$friends_count = (isset($users['friends_count'])) ? $users['friends_count'] : 0;
+	//$listed_count = (isset($users['listed_count'])) ? $users['listed_count'] : 0;
+	//$favourites_count = (isset($users['favourites_count'])) ? $users['favourites_count'] : 0;
+	//$statuses_count = (isset($users['statuses_count'])) ? $users['statuses_count'] : 0;
+	$created_at = (isset($created_at)) ? DateTime::createFromFormat('D M d H:i:s P Y',  (string)$created_at)->format('Y-m-d H:i:s') : 0;
+	
+	$req->execute(array(
+		'user_id'=> $user_id,
+		'name'=> $name,
+		'screen_name'=> $screen_name,
+		'location'=> $location,
+		'url'=> $url,
+		'description'=> $description,
+		'followers_count'=> $followers_count,
+		'friends_count'=> $friends_count,
+		'listed_count'=> $listed_count,
+		'favourites_count'=> $favourites_count,
+		'statuses_count'=> $statuses_count,
+		'created_at' => $created_at,
+                'name'=> $name,
+                'screen_name'=> $screen_name,
+                'location'=> $location,
+                'url'=> $url,
+                'description'=> $description,
+                'followers_count'=> $followers_count,
+                'friends_count'=> $friends_count,
+                'listed_count'=> $listed_count,
+                'favourites_count'=> $favourites_count,
+                'statuses_count'=> $statuses_count,
+                'created_at' => $created_at,
+                'name2'=> $name,
+                'screen_name2'=> $screen_name,
+                'location2'=> $location,
+                'url2'=> $url,
+                'description2'=> $description,
+                'followers_count2'=> $followers_count,
+                'friends_count2'=> $friends_count,
+                'listed_count2'=> $listed_count,
+                'favourites_count2'=> $favourites_count,
+                'statuses_count2'=> $statuses_count,
+                'created_at2' => $created_at
+
+		));
+		
+	return $bdd->lastInsertId();
+}
+
 //Insert a tweet
 function saveTweet($tweet, $task_id)
 {	
@@ -183,7 +249,7 @@ function saveTweet($tweet, $task_id)
 	$geo = (isset($tweet['geo'])) ? $tweet['geo'] : '';
 	//$sql = "INSERT INTO tweet( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, coordinates, place, geo, user_id) ".
         //" VALUES(".$id.", ".$task_id.", '".$text."', '".$created_at."', '".$source."', ".$in_reply_to_status_id.", ".$in_reply_to_user_id.", '".$in_reply_to_screen_name."', ".$retweet_count.", ".$favorite_count.", '".$coordinates."', '".$place."', '".$geo."', ".$user_id.")";
-
+	print_r($id);
 	$req->execute(array(
 		'id'=> $id,
 		'task_id'=> $task_id,

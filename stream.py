@@ -5,31 +5,105 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from tweepy import API
+from datetime import datetime, timedelta
+from email.utils import parsedate_tz
 import os, sys, tweepy, json
 import code
+import MySQLdb
 def extract_parameter(parameter) :
 	list = []
 	if not parameter:
 		return list
 	list = parameter.split(',')
 	return list
+	
+def to_datetime(datestring):
+    time_tuple = parsedate_tz(datestring.strip())
+    dt = datetime(*time_tuple[:6])
+    return dt - timedelta(seconds=time_tuple[-1])
+	
+db=MySQLdb.connect(host="localhost",user="tweetbase",passwd=code.bdd_password,db="tweetbase")
+	
+def saveUser(user):
+	global db
+	c=db.cursor()
+	#user insert
+	if user['location'] is not None:
+		location = (user['location']).encode('UTF-8')
+	else:
+		location = ""
+	if user['url'] is not None:
+		url = user['url']
+	else:
+		url = ""
+	if user['description'] is not None:
+		description = (user['description']).encode('UTF-8')
+	else:
+		description = ""
+	
+	sql = "INSERT INTO user VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE name=%s, screen_name=%s, location = %s, url = %s, description = %s, followers_count = %s, friends_count = %s, listed_count = %s, favourites_count = %s, statuses_count = %s, created_at = %s"
+	
+	#print query_user
+	
+	c.execute(sql, (user['id'], (user['name']).encode('UTF-8'), 
+	(user['screen_name']).encode('UTF-8'), location, url, description, 
+	user['followers_count'], user['friends_count'], 
+	user['listed_count'], user['favourites_count'], 
+	user['statuses_count'], to_datetime(user['created_at']), 
+	(user['name']).encode('UTF-8'), (user['screen_name']).encode('UTF-8'), 
+	location, url, description, user['followers_count'], user['friends_count'], 
+	user['listed_count'], user['favourites_count'], user['statuses_count'], 
+	to_datetime(user['created_at'])))
 
+	db.commit()
+	
+	
+def saveTweet(tweet):
+	global db
+	c=db.cursor()
+	if tweet['coordinates'] is not None:
+		coordinates = tweet['coordinates']
+	else:
+		coordinates = ""
+	if tweet['place'] is not None and tweet['place']['name'] is not None:
+		place = (tweet['place']['name']).encode('UTF-8')
+	else:
+		place = ""
+	if tweet['geo'] is not None:
+		geo = tweet['geo']
+	else:
+		geo = ""
+	if tweet['in_reply_to_screen_name'] is not None:
+		in_reply_to_screen_name = (tweet['in_reply_to_screen_name']).encode('UTF-8')
+	else:
+		in_reply_to_screen_name = ""
+	if tweet['source'] is not None:
+		source = (tweet['source']).encode('UTF-8')
+	else:
+		source = ""
+	sql = "INSERT INTO tweet ( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, coordinates, place, geo, user_id)  VALUES ('%s', (SELECT task_id FROM task WHERE state > 0), %s, %s, %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s)"
+	c.execute(sql, (tweet['id'], (tweet['text']).encode('UTF-8'), 
+	to_datetime(tweet['created_at']), source, 
+	tweet['in_reply_to_status_id'], tweet['in_reply_to_user_id'], 
+	in_reply_to_screen_name, tweet['retweet_count'], 
+	tweet['favorite_count'], coordinates, place, geo,
+	tweet['user']['id']))
+	db.commit()
+	
+def removeExistingFile():
+	if os.path.isfile('/home/thibault/tweetBase/TweetBase/website/workfile'): 
+		os.remove('/home/thibault/tweetBase/TweetBase/website/workfile')
+		print 'Data file exist, deleting'
+	
 #This is a basic listener that just prints received tweets to stdout.
 class StdOutListener(StreamListener):
 
-    def on_data(self, data):
-	f = open('/home/thibault/tweetBase/TweetBase/website/workfile', 'a+')
-	f.write(data)
-	
-	#decoded = json.loads(data)
-
-	#user = decoded['user']['id']
-
-	#ff = open('/home/thibault/tweetBase/TweetBase/website/users', 'a+')
-	#for follower in api.followers_ids(user):
-		#ff.write(json.dumps(api.get_user(follower)._json))
-	#ff.close
-        return True
+    def on_data(self, data):		
+		decoded = json.loads(data)
+		saveUser(decoded['user'])
+		saveTweet(decoded)
+		
+		return True
 
     def on_error(self, status):
         print status
@@ -39,34 +113,19 @@ if __name__ == '__main__':
 
 	#This handles Twitter authetification and the connection to Twitter Streaming API
 	#We need to remove the workfile if exists (for user and tweet data)
-        if os.path.isfile('/home/thibault/tweetBase/TweetBase/website/user'):
-                os.remove('/home/thibault/tweetBase/TweetBase/website/user')
-                print 'User file exists, deleting'
-
-
-	if os.path.isfile('/home/thibault/tweetBase/TweetBase/website/workfile'): 
-		os.remove('/home/thibault/tweetBase/TweetBase/website/workfile')
-		print 'Data file exist, deleting'
 	l = StdOutListener()
 	auth = OAuthHandler(code.consumer_key, code.consumer_secret)
  	auth.set_access_token(code.access_token, code.access_token_secret)
 	#Connection to the stream API
 	stream = Stream(auth, l)
-	#Connection to witter API (needed for user information)
-	api = tweepy.API(auth)
+	
+	removeExistingFile()
 
 	#We check if parameters received are correct
-	if len(sys.argv) != 4:
+	if len(sys.argv) != 2:
 		print "Parameters missing or too more"
 		exit(0)
 	        	
 	#We get the parameters
 	keywords = sys.argv[1]
-	user_screename = sys.argv[2]
-	user_info = sys.argv[3]
-	user_id = []
-	#We have ton conveert the screen name to user id
-	for member in extract_parameter(user_screename):
-		user_id.append(str(api.get_user(screen_name = member).id))
-	#This line filter Twitter Streams to capture data by the keywords
-	stream.filter(track=extract_parameter(keywords), follow=user_id)
+	stream.filter(track=extract_parameter(keywords))

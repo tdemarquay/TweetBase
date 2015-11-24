@@ -43,12 +43,13 @@ if(isset($_GET['stop']))
 {
 	//Kill process
 	exec("pkill  python");
-	readFileAndSave(getTaskUserInfo(getCurrentTaskId()));
+	//readFileAndSave(getTaskUserInfo(getCurrentTaskId()));
 	//Update end time
 	endCurrentTask();
 	stopAllTask();
 	if(file_exists("workfile"))unlink("workfile");
 	if(file_exists("output"))unlink("output");
+	 if(file_exists("user"))unlink("users");
 	echo "Task stopped and data saved in database";
 }
 
@@ -63,14 +64,18 @@ if(isset($_POST['new']))
 	if(!isset($_POST['user_info'])) $user_info = 0;
 	else $user_info = 1;
 	$track = $_POST['keywords'];
-	$follow = $_POST['user_id'];
+	$follow = '';
 	//we concatenate all the parameters
-	$parameters = "'".$track."' '".$follow."' ".$user_info;
+	//$parameters = "'".$track."' '".$follow."' ".$user_info;
+	$parameters = "'".$track."'";
 	
 	addTask($track, $follow, $user_info);
 		
-	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." > /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
+	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 1> /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
 
+		//$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." >>/home/thibault/tweetBase/TweetBase/website/output  2>&1 &";
+
+	
 	//We print the user command for debugging
 	echo "<br/>The executed command is  : ".$command."<br/><br/>";
 	//If an old process was processing, we kill it
@@ -106,15 +111,14 @@ else
 	<?php if(!isATaskRunning()) echo '<form method="post" action="task.php">'; ?>
 	   <p>
 		<?php if(!isATaskRunning()) echo '<input type="hidden" name="new">'; ?>
-	    <label for="pseudo">Username :</label>
-		   <input style="width:500px" value="<?php echo $user_id;?>" <?php echo $disabled;?>  type="text" name="user_id" id="pseudo" /><br/>Separate by comma.<br/><br/> <b>OR</b><br/><br/>
-	   
+	    <!--<label for="pseudo">Username :</label>-->
+		
 	   
 		   <label for="pseudo">Keywords :</label>
 		   <input style="width:500px" value="<?php echo $keywords; ?>" <?php echo $disabled?> type="text" name="keywords" id="pseudo" /><br/>Separate by comma (=OR). <br/>Can have two words or more between two commas (=AND). <br/>Can be a hastag (don't forget the #)
 		 
 		  <br /><br />
-                   <label for="pass">Download also user information and relationships :</label>
+                   <label for="pass">Download also user information :</label>
                    <input type="checkbox" name="user_info" value="user_info" <?php echo $user_info." ".$disabled; ?>>
 
 		  
