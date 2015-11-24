@@ -7,9 +7,11 @@ from tweepy import Stream
 from tweepy import API
 from datetime import datetime, timedelta
 from email.utils import parsedate_tz
+from warnings import filterwarnings
 import os, sys, tweepy, json
 import code
 import MySQLdb
+filterwarnings('ignore', category = MySQLdb.Warning)
 def extract_parameter(parameter) :
 	list = []
 	if not parameter:
@@ -22,7 +24,7 @@ def to_datetime(datestring):
     dt = datetime(*time_tuple[:6])
     return dt - timedelta(seconds=time_tuple[-1])
 	
-db=MySQLdb.connect(host="localhost",user="tweetbase",passwd=code.bdd_password,db="tweetbase")
+db=MySQLdb.connect(host="localhost",user="tweetbase",passwd=code.bdd_password,db="tweetbase",use_unicode=True,charset='UTF8')
 	
 def saveUser(user):
 	global db
@@ -61,18 +63,10 @@ def saveUser(user):
 def saveTweet(tweet):
 	global db
 	c=db.cursor()
-	if tweet['coordinates'] is not None:
-		coordinates = tweet['coordinates']
-	else:
-		coordinates = ""
-	if tweet['place'] is not None and tweet['place']['name'] is not None:
-		place = (tweet['place']['name']).encode('UTF-8')
+	if tweet.get('place'):
+		place = (tweet['place']['full_name']).encode('UTF-8')
 	else:
 		place = ""
-	if tweet['geo'] is not None:
-		geo = tweet['geo']
-	else:
-		geo = ""
 	if tweet['in_reply_to_screen_name'] is not None:
 		in_reply_to_screen_name = (tweet['in_reply_to_screen_name']).encode('UTF-8')
 	else:
@@ -81,12 +75,12 @@ def saveTweet(tweet):
 		source = (tweet['source']).encode('UTF-8')
 	else:
 		source = ""
-	sql = "INSERT INTO tweet ( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, coordinates, place, geo, user_id)  VALUES ('%s', (SELECT task_id FROM task WHERE state > 0), %s, %s, %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s)"
-	c.execute(sql, (tweet['id'], (tweet['text']).encode('UTF-8'), 
+	sql = "INSERT INTO tweet ( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, place, user_id)  VALUES ('%s', (SELECT task_id FROM task WHERE state > 0), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	c.execute(sql, (tweet['id'], (tweet['text']), 
 	to_datetime(tweet['created_at']), source, 
 	tweet['in_reply_to_status_id'], tweet['in_reply_to_user_id'], 
 	in_reply_to_screen_name, tweet['retweet_count'], 
-	tweet['favorite_count'], coordinates, place, geo,
+	tweet['favorite_count'], place,
 	tweet['user']['id']))
 	db.commit()
 	
