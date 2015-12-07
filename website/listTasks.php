@@ -20,7 +20,7 @@ if(isset($_GET['purge']))
 if(isset($_GET['csv'])) 
 {
 	if(file_exists("mydata.csv")) unlink("mydata.csv");
-	generateCSV();
+	generateCSV($_GET['csv']);
 	header('Location: mydata.csv');
 }
 ?>
@@ -69,7 +69,7 @@ if(isset($_GET['csv']))
 		echo "<td>".$task['task_end_datetime']."</td>";
 		if($task['state']==0) echo "<td><input type='button' onclick=\"location.href='listTasks.php?delete=".$task['task_id']."';\" value=\"Delete\"></td>";
 		else echo "Current task";
-		if($task['state']==0)echo "<td><input type='button' onclick=\"location.href='listTasks.php?csv=1';\" value=\"CSV\"></td>";
+		if($task['state']==0)echo "<td><input type='button' onclick=\"location.href='listTasks.php?csv=".$task['task_id']."';\" value=\"CSV\"></td>";
 		else echo "Current task";
 		echo "</tr>";
 	}

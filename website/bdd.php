@@ -281,8 +281,13 @@ function endCurrentTask()
 function getNumberTweets($task_id) 
 {
 	global $bdd;
-	$result = $bdd->query("SELECT COUNT(*) FROM tweet WHERE task_id= ".$task_id);
-	return $result->fetch()['COUNT(*)'];
+	if(!empty($task_id) AND !is_null($task_id))
+	{
+		$result = $bdd->query("SELECT COUNT(*) FROM tweet WHERE task_id= ".$task_id);
+		return $result->fetch()['COUNT(*)'];
+	}
+	else return 0;
+
 }
 
 
@@ -308,21 +313,20 @@ function deleteTask($task_id)
 
 }
 
-function generateCSV()
+function generateCSV($id)
 {
 	global $bdd;
 	$bdd->query('SELECT * INTO OUTFILE "/home/thibault/tweetBase/TweetBase/website/mydata.csv"
 	FIELDS TERMINATED BY \',\' OPTIONALLY ENCLOSED BY \'"\'
 	LINES TERMINATED BY "\n"
 	FROM task,tweet,user 
-	WHERE tweet.user_id = user.user_id AND tweet.task_id = task.task_id AND task.state = 0');
+	WHERE tweet.user_id = user.user_id AND tweet.task_id = task.task_id AND task.state = 0 AND task.task_id='.$id);
 }
 
 //delete all data
 function purge()
 {
 	global $bdd;
-	$bdd->exec("DELETE FROM relationship");
 	$bdd->exec("DELETE FROM user");
 	$bdd->exec("DELETE FROM tweet");
 	$bdd->exec("DELETE FROM task");

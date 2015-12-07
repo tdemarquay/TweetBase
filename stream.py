@@ -46,6 +46,7 @@ def saveUser(user):
 	sql = "INSERT INTO user VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE name=%s, screen_name=%s, location = %s, url = %s, description = %s, followers_count = %s, friends_count = %s, listed_count = %s, favourites_count = %s, statuses_count = %s, created_at = %s"
 	
 	#print query_user
+	#print user['id']
 	
 	c.execute(sql, (user['id'], (user['name']).encode('UTF-8'), 
 	(user['screen_name']).encode('UTF-8'), location, url, description, 
@@ -75,6 +76,9 @@ def saveTweet(tweet):
 		source = (tweet['source']).encode('UTF-8')
 	else:
 		source = ""
+		
+	print tweet['user']['id']
+	
 	sql = "INSERT INTO tweet ( id, task_id, text, created_at, source, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, retweet_count, favorite_count, place, user_id)  VALUES ('%s', (SELECT task_id FROM task WHERE state > 0), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 	c.execute(sql, (tweet['id'], (tweet['text']), 
 	to_datetime(tweet['created_at']), source, 
@@ -94,8 +98,9 @@ class StdOutListener(StreamListener):
 
     def on_data(self, data):		
 		decoded = json.loads(data)
-		saveUser(decoded['user'])
-		saveTweet(decoded)
+		if 'user' in decoded:
+			saveUser(decoded['user'])
+			saveTweet(decoded)
 		
 		return True
 

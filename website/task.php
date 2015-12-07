@@ -1,6 +1,7 @@
 <?php
 include ('bdd.php');
 include('functions.php');
+session_start();
 ?>
 <head>
 <title> Current/Create task</title>
@@ -30,13 +31,17 @@ ini_set('display_errors',1);
 if(isset($_GET['pause'])) 
 {
 	pauseTask();
-	exec("pkill -STOP python");
+	//exec("pkill -STOP python");
+	exec("pkill  python");
 	echo "Task paused";
 }
 if(isset($_GET['resume']))
 {
 	resumeTask();
-	exec("pkill -CONT python");
+	//exec("pkill -CONT python");
+	$parameters = $_SESSION['$parameters'];
+	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 1> /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
+	exec($command);
 	echo "Task resumed";
 }
 if(isset($_GET['stop']))
@@ -49,7 +54,7 @@ if(isset($_GET['stop']))
 	stopAllTask();
 	if(file_exists("workfile"))unlink("workfile");
 	if(file_exists("output"))unlink("output");
-	 if(file_exists("user"))unlink("users");
+	if(file_exists("user"))unlink("users");
 	echo "Task stopped and data saved in database";
 }
 
@@ -58,31 +63,33 @@ if(isset($_GET['stop']))
 //If the user wants to create a task
 if(isset($_POST['new']))
 {
-	//Not possible case but a checking must be done
-	stopAllTask();
-	//We get the information of the form
-	if(!isset($_POST['user_info'])) $user_info = 0;
-	else $user_info = 1;
-	$track = $_POST['keywords'];
-	$follow = '';
-	//we concatenate all the parameters
-	//$parameters = "'".$track."' '".$follow."' ".$user_info;
-	$parameters = "'".$track."'";
-	
-	addTask($track, $follow, $user_info);
+	if(!isATaskRunning())
+	{
+		//Not possible case but a checking must be done
+		stopAllTask();
+		//We get the information of the form
+		if(!isset($_POST['user_info'])) $user_info = 0;
+		else $user_info = 1;
+		$track = $_POST['keywords'];
 		
-	$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 1> /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
+		$follow = '';
+		//we concatenate all the parameters
+		//$parameters = "'".$track."' '".$follow."' ".$user_info;
+		$parameters = "'".$track."'";
+		$_SESSION['$parameters'] = $parameters;
+		
+		addTask($track, $follow, $user_info);
+			
+		$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 1> /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
 
-		//$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." >>/home/thibault/tweetBase/TweetBase/website/output  2>&1 &";
+		//We print the user command for debugging
+		//echo "<br/>The executed command is  : ".$command."<br/><br/>";
+		//If an old process was processing, we kill it
+		exec("pkill python");
+		//We execute the command. We check that command variable is not empty
+		if(!empty($command))exec($command,$output);
+	}
 
-	
-	//We print the user command for debugging
-	echo "<br/>The executed command is  : ".$command."<br/><br/>";
-	//If an old process was processing, we kill it
-	exec("pkill python");
-	//We execute the command. We check that command variable is not empty
-	if(!empty($command))exec($command,$output);
-	//print_r($output);
 }
 
 //We check if a taskis running
@@ -137,7 +144,7 @@ else
 </p>
 
 	<?php if(!isATaskRunning()) echo '</form>'; else { ?>
-<h2><a href = "workfile">Results file </a> (Currently : <p style="display:inline" id="results_nb">0</p> results/tweets)</h2>
+<h2>Currently : <p style="display:inline" id="results_nb">0</p> results/tweets</h2>
 <h2>Errors/warnings</h2>
 <textarea style="width:800px;height:200px" id="error_textarea"></textarea>
 <?php } ?>
