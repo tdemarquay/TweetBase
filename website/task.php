@@ -79,7 +79,7 @@ if(isset($_POST['new']))
 		$_SESSION['$parameters'] = $parameters;
 		
 		addTask($track, $follow, $user_info);
-			
+		//think to change for delivery	
 		$command = "python /home/thibault/tweetBase/TweetBase/stream.py ".$parameters." 1> /home/thibault/tweetBase/TweetBase/website/output 2>/home/thibault/tweetBase/TweetBase/website/output &";
 
 		//We print the user command for debugging
