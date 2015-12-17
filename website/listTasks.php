@@ -14,6 +14,7 @@ if(isset($_GET['delete']))
 if(isset($_GET['purge']))
 {
         purge();
+        $test = 12;
         $error = "All data deleted";
 }
 
